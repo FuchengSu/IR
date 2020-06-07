@@ -1,8 +1,5 @@
 # ReadMe
 
-IR Project in ZJU 2018 Summer
-Group 3
-
 - Python3
 - 使用 nltk 库 + chardet
 - Windows 系统可能要改 utils.py 里的路径
