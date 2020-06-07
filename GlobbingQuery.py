@@ -167,15 +167,15 @@ class Tree(object):
 
 #to build a btree of using all words and build a btree_rev of reverse words
 def BuildTree(wordlist):
-    print("building B tree...")
+    print("building b-tree...")
     btree = Tree()
     btree_rev = Tree()
     for word in wordlist:
         btree.put(word)
         btree_rev.put(word[::-1])
-    print(btree.root.key1)
-    print(btree_rev.root.key1)
-    print("building B tree finished")
+    # print(btree.root.key1)
+    # print(btree_rev.root.key1)
+    print("building b-tree finished")
     return btree, btree_rev
 
 #do globbing query.
