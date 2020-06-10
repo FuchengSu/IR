@@ -7,6 +7,7 @@ import BooleanQuery
 import PhraseQuery
 import GlobbingQuery
 import SpellingCorrect
+import Synonyms
 # import Synonyms
 
 def initial():
@@ -31,6 +32,13 @@ def prepare():
 
 
 def main():
+    # prepare()
+    print("Preparing...")
+    index = utils.get_from_file('index')
+    wordlist = utils.get_from_file('wordlist')
+    doc_size = utils.get_from_file('doc_size')
+    VSM = utils.get_from_file('VSM')
+    btree, btree_rev = GlobbingQuery.BuildTree(wordlist)
     print("*"*53*2)
     print(" "*34,"This is a simple search engine.")
     print("Support: Bollean query, Wildcard query, Spelling correction, Phrase query and Synonym expansion.")
@@ -75,5 +83,5 @@ def main():
 
 if __name__ == "__main__":
     # initial()
-    prepare()
+    # prepare()
     main()
