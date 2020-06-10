@@ -1,7 +1,7 @@
 # encoding: utf-8  
 import re, collections
 import utils
-
+import PhraseQuery
 
 
 def tolower(text):
@@ -53,7 +53,7 @@ def identify(words):
 def getMax(wanteds):
     threewanteds=[]
     maxword = max(wanteds,key=lambda w : nwords[w])
-    threewanteds.append('want to input: '+ maxword)
+    threewanteds.append(maxword)
     wanteds.remove(maxword)
 
     if len(wanteds)>0:
@@ -81,10 +81,16 @@ def bayesClassifier(word):
 def spelling_correct(x):
 
 	y=re.findall(r"\w+",x)
+	print("\n")
+	number = 0
+	query = ""
 	for word in y:
 		if  bayesClassifier(word)!=0:
+			number += 1
+			print("The correction of", word, "is as follows:")
 			print(bayesClassifier(word))
-
-			
-query = "prider and prejudice "
-spelling_correct(query)
+			query = query + " " + bayesClassifier(word)[0]
+	flag = input("Do you want to query as the first correction? (y/n): ")
+	if flag == "y":
+		print("The corrected query is \"", query, "\"")
+		PhraseQuery.phrasequery(query)
