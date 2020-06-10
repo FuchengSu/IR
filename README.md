@@ -10,7 +10,7 @@
 
 ```
 IRProject
-|_Reuters // 语料库文件夹，不提供，自己解压缩
+|_Reuters // 语料库文件夹
 |
 |_readme.txt // 就是你在读的这个
 |
@@ -18,11 +18,12 @@ IRProject
 |_utils.py // 一些轮子，具体看注释
 |_InvertedIndex.py // 倒排索引模块（构建/获取倒排索引，构建 VSM ）
 |_BooleanQuery.py // 布尔检索
-|_GlobbingQuery.py // 通配符检索
+|_GlobbingQuery.py // 通配符检索(使用b-tree构建词典)
 |_PhraseQuery.py // 短语检索
-|_SpellingCorrect.py // 纠正拼写
+|_SpellingCorrect.py // 拼写纠正
 |_Score.py // 评分
-|_topk.py // Top-K
+|_topk.py // top-K
+|_Synonyms // 同义词扩展
 |
 |_index.json // 跑出来的示例倒排索引
 |_wordlist.json // 跑出来的示例词表
