@@ -83,9 +83,13 @@ class ZPriorityQ(ZHeap):
         return val
 
 def topK(wordlist, docID):
-
-    K = int(input("how many doc do you want to see at most?\nprint -1 for all docs.\n"))
-    print("\n\n************* Show Result ************\n\nFind ",len(docID), " docs.\n")
+    print("The result is as follows: \n Totally find ",len(docID), " docs.\n")
+    flag = input("Do you want to see all docs? (y/n): ")
+    if flag == "y":
+        K = -1
+    else:
+        K = int(input("How many docs do you want to see? (topK)"))
+    # K = int(input("how many doc do you want to see at most?\nprint -1 for all docs.\n"))
     #print("here is topK")
     VSM_sum = utils.get_from_file('VSM_sum')
     pq = ZPriorityQ()
