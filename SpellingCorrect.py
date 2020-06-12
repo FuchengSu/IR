@@ -94,3 +94,5 @@ def spelling_correct(x):
 	if flag == "y":
 		print("The corrected query is \"", query, "\"")
 		PhraseQuery.phrasequery(query)
+# query = "prider and prejudice "
+# spelling_correct(query)
