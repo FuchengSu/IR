@@ -67,11 +67,14 @@ def loadLocationIndex(word):
 
 def loadIndex(word):
     f = open("index.json", encoding='utf-8')
-    dictionary = json.load(f)
-    index = dictionary[word]
     result = []
-    for item in index:
-        result.append(int(item))
+    dictionary = json.load(f)
+    if word in dictionary:
+        index = dictionary[word]
+        for item in index:
+            result.append(int(item))
+    else:
+        result = []    
     return result
 
 def printtext(wordlist, doclist):
