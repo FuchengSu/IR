@@ -22,6 +22,7 @@ IRProject
 |_PhraseQuery.py // 短语检索
 |_SpellingCorrect.py // 拼写纠正
 |_Score.py // 评分
+|_VBcompress.py // 使用VBcode进行索引压缩
 |_topk.py // top-K
 |_Synonyms // 同义词扩展
 |
