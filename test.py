@@ -1,44 +1,54 @@
 import os
 import math
 import copy
+import sys
+import json
+
+by = []
 
 def VBEncodeNumber(n):
-    by, byte = '', []
+    byte = []
     while True:
-        byte.insert(0, n % 128 + 128)
+        byte.insert(0, n % 128)
         if n < 128:
             break
         n = n // 128
-    for i in range(len(byte)):
-        if i < len(byte) - 1:
-           by += bin(byte[i]).replace('0b1', '0') + ' '
-        else:
-           by += bin(byte[i]).replace('0b', '')
-    return by
-
+    byte[len(byte)-1] += 128
+    by.extend(byte)
 
 def VBEncode(numbers):
-    bytestream = []
     for n in numbers:
-        byte = VBEncodeNumber(n)
-        bytestream.append(byte)
+        VBEncodeNumber(n)
+    bytestream = bytes(by)
+    by.clear()
     return bytestream
 
 def VBDecode(bytestream):
     numbers = []
     n = 0
     for i in range(len(bytestream)):
-        byte = bytestream[i].split(' ')
-        l = len(byte)
-        for j in range(l):
-            if j < 1 - 1:
-                by = int('0b1' + byte[j][1: len(byte[j])], 2)
-            else:
-                by = int('0b' + byte[j], 2)
-            n = 128*n + by if by < 128 else 128*(n - 1) + by
-        numbers.append(n)
-        n = 0
+        if bytestream[i] < 128:
+            n = 128 * n + bytestream[i]
+        else:
+            n = 128 * n + bytestream[i] - 128
+            numbers.append(n)
+            n = 0
     return numbers
+
+def loadIndex(word):
+    f = open('index.json', encoding='utf-8')
+    dictionary = json.load(f)
+    index = dictionary[word]
+    result = []
+    for item in index:
+        result.append(int(item))
+    return result
+
+def loadLocationIndex(word):
+    f = open('index.json', encoding='utf-8')
+    dictionary = json.load(f)
+    index = dictionary[word]
+    return
 
 def countInvertIndex(daopai):
     daopaidis = daopai.copy()
@@ -55,81 +65,71 @@ def countInvert(daopaidis):
         daopai[i] = sum(daopaidis[0: i + 1])
     return daopai
 
+def write_json(data, filename):
+    file = open(filename, 'w')
+    str = json.JSONEncoder().encode(data)
+    file.write(str)
+    file.close()
 
+def compress(file_compress,file_store):
+    new_index = {}
+    f = open(file_compress, encoding='utf-8')
+    dictionary = json.load(f)
 
-index = {}
-index2 = {}
-doclist = {}
-doclist[12345] = [1]
-index['zys'] = doclist
-index2['zys'] = copy.deepcopy(doclist)
-# index2 = copy.deepcopy(index)
-index['zys'][23456] = [23]
-index['zys'][34567] = [2]
-index['zys'][12345].append(4)
-index['zys'][12345].append(10)
-doclist = {}
-doclist[4478] = [4]
-index['wwj'] = doclist
-index2['wwj'] = copy.deepcopy(doclist)
-index['wwj'][4567] = [12]
-index['wwj'][4569] = [2]
-     
-# daopaidis = VBDecode(bytestream)
-# daopai = countInvert(daopaidis)
-VBlist = []
-for key in index:
-    # print(list(index[key]))
-    daopaidis = countInvertIndex(list(index[key]))
-    bytestream = VBEncode(daopaidis)
-    index2[key] = []
-    # tmp = {}
-    tmplist = []
-    tmpi = 0
-    for (key2, value) in index[key].items():
-        tmpdict = {}
-        tmpdict[bytestream[tmpi]] = value
-        index2[key].append(tmpdict)
-        tmpi += 1
-        
-    
-    # tmp = dict(zip(bytestream, tmplist))
-    # index2[key] = copy.deepcopy(tmp)
+    for dic in dictionary:
+        index = dictionary[dic]
+        temp = []
+        sub_index = []
+        for key in sorted(index.keys(), key=lambda s: int(s)):
+            sub_index.append(int(key))
+        daopaidis = countInvertIndex(sub_index)
+        bytestream = VBEncode(daopaidis)
+        temp.append(int.from_bytes(bytestream, byteorder='big', signed=False))
+        for key in sorted(index.keys(), key=lambda s: int(s)):
+            daopaidis = countInvertIndex(list(index[key]))
+            bytestream = VBEncode(daopaidis)
+            temp.append(int.from_bytes(bytestream, byteorder='big', signed=False))
+        new_index[dic] = temp
+    write_json(new_index, file_store)
+    f.close()
 
-def sub(string, p, c):
-    new = []
-    for s in string:
-        new.append(s)
-    new[p] = c
-    return ''.join(new)
+def decompress(file_decompress,file_store):
+    num = 1
+    dictionary2 = {}
+    f2 = open(file_decompress, encoding='utf-8')
+    dictionary2 = json.load(f2)
+    new_index2 = {}
 
-temp = str(index2)
-print(index2)   
-zhuangtai = 0   
-i = 0
-ttt = ''
-for i in range(len(temp)):
-    if temp[i] == '[' and zhuangtai == 0:
-        zhuangtai = 1
-        ttt = ttt + '{'
-    elif temp[i] == '{' and zhuangtai == 1:
-        zhuangtai = 2
-        # temp = temp[:i] + temp[i+1:]
-    elif temp[i] == '}' and zhuangtai == 2:
-        # temp = temp[:i] + temp[i+1:]
-        zhuangtai = 3
-    elif temp[i] == ']' and zhuangtai == 3:
-        zhuangtai = 0
-        ttt = ttt + '}'
-    elif temp[i] != ']' and zhuangtai == 3:
-        zhuangtai = 1
-        ttt = ttt + temp[i]
-    else:
-        ttt = ttt + temp[i]
+    for dic in dictionary2:
+        daopaidis = []
+        daopai = []
+        temp = {}
+        index = dictionary2[dic]
+        temp_byte = int.to_bytes(index[0], 10000, byteorder='big', signed=False)
+        daopaidis = VBDecode(temp_byte)
+        daopai = countInvert(daopaidis)
 
+        for i in range(len(index) - 1):
+            locationdis = []
+            location = []
+            bytestream = int.to_bytes(index[i + 1], 10000, byteorder='big', signed=False)
+            locationdis = VBDecode(bytestream)
+            location = countInvert(locationdis)
+            temp[daopai[i]] = location
 
-print(index)
-print(ttt)  
-# print(type(temp))
-# print(index2)
-# print(type(index2))
+        new_index2[dic] = temp
+        print(num)
+        num = num + 1
+
+    f2.close()
+    write_json(new_index2, file_store)
+
+compress('index.json','indexcompress')
+decompress('indexcompress', 'newindex.json')
+
+fsize1 = os.path.getsize('index.json')
+fsize2 = os.path.getsize('indexcompress')
+fsize3 = os.path.getsize('newindex.json')
+print(fsize1)
+print(fsize2)
+print(fsize3)
