@@ -1,9 +1,11 @@
 
+import copy
 import utils
 import json
 import chardet
 import html
 import topk
+
 
 def phrasequery_wordlist(wordlist):
     docID = []
@@ -107,10 +109,39 @@ def isPhrase(judge_onedoc):
         return True
     return False
 
+def merge(list1, list2):
+    list1.sort()
+    list2.sort()
+    i = 0
+    j = 0
+    result = []
+    while(i<len(list1) and j<len(list2)):
+        if list1[i]==list2[j]:
+            result.append(list1[i])
+            i+=1
+            j+=1
+        elif list1[i]<list2[j]:
+            i+=1
+        else:
+            j+=1
+    return result
+
 def phrasequery(query):
     query = query.lower()
     wordlist = query.split(' ')
-    docID = phrasequery_wordlist(wordlist)
+    if len(wordlist) == 2 or len(wordlist) == 1:
+        docID = phrasequery_wordlist(wordlist)
+    else:
+        docID = []
+        for i in range(len(wordlist)-1):
+            tmpList = []
+            tmpList.append(wordlist[i])
+            tmpList.append(wordlist[i+1])
+            tmpID = phrasequery_wordlist(tmpList)
+            if i == 0:
+                docID = tmpID
+            else:
+                docID = merge(docID, tmpID)
     if docID is not None:
         docID = topk.topK(wordlist,docID)
         printquery = [query]
