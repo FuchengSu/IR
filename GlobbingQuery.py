@@ -285,7 +285,15 @@ def controller(query, btree, btree_rev, words):
     for i in range(1,len(docIDlist)):
         result = BooleanQuery.handle_or(result,docIDlist[i])
 
-    docID = topk.topK(wordlist, result)
-    utils.printtext(wordlist, docID)
+
+    print("The result is as follows: \n Totally find ",len(result), " docs.\n")
+    print(result)
+    flag = input("Do you want to see all docs? (y/n): \n")
+    if flag == "y":
+        utils.printtext(wordlist,result)
+    else:
+        print("query complete\n")
+    # docID = topk.topK(wordlist, result)
+    # utils.printtext(wordlist, docID)
     #utils.printtext(wordlist, result)
     return True

@@ -8,7 +8,9 @@ import PhraseQuery
 import GlobbingQuery
 import SpellingCorrect
 import Synonyms
-# import Synonyms
+import topk
+import VBcompress
+
 
 def initial():
     index, doc_size = InvertedIndex.create_index()
@@ -29,6 +31,7 @@ def prepare():
     doc_size = utils.get_from_file('doc_size')
     VSM = utils.get_from_file('VSM')
     btree, btree_rev = GlobbingQuery.BuildTree(wordlist)
+    
 
 
 def main():
@@ -43,6 +46,16 @@ def main():
     print(" "*34,"This is a simple search engine.")
     print("Support: Bollean query, Wildcard query, Spelling correction, Phrase query and Synonym expansion.")
     print("Also use Top K strategy of static score, VB code index compression strategy and dictionary built by b-tree")
+    fsize1 = os.path.getsize('index.json')
+    fsize2 = os.path.getsize('indexcompress.json')
+    compress_rate = fsize2 / fsize1
+    # fsize3 = os.path.getsize('newindex.json')
+    print("\nThe initial size of \"index.json\" is", end=" ")
+    print(fsize1)
+    print("After compress using VB-code, the size of \"indexcompress.json\" is", end=" ")
+    print(fsize2)
+    print("Compression rate is", end=" ")
+    print("{:.2%}".format(compress_rate))
         
     while True:
         print("*"*53*2)
@@ -52,11 +65,12 @@ def main():
         print(" "*4,"3. Spelling correction")
         print(" "*4,"4. Phrase query")
         print(" "*4,"5. Synonym expansion")
+        print(" "*4,"6. topK search")
         number = input("Input -1 to quit\n")
         if int(number)==-1:
             break
-        if int(number) > 5 or int(number) == 0:
-            print("Please input 1 to 5 for query and input -1 for quit")
+        if int(number) > 6 or int(number) == 0:
+            print("Please input 1 to 6 for query and input -1 for quit")
             continue
         query = input("Input your query:\n")
 
@@ -75,6 +89,9 @@ def main():
 
         if(int(number)==5):
             Synonyms.synonyms_query(query)
+
+        if(int(number)==6):
+            topk.topK(query, index)
 
         time_end = time.time()
         print("query time: ", time_end-time_start)

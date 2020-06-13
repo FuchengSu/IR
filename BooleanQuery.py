@@ -184,9 +184,17 @@ def controller(query):
     query.replace('  ',' ')
     wordlist = []
     wordlist = query.split(' ')
-    docID = topk.topK(wordlist,index)
-    #print(index)k
-    utils.printtext(wordlist,docID)
+    print("The result is as follows: \n Totally find ",len(index), " docs:\n")
+    print(index)
+    flag = input("Do you want to see all docs? (y/n): \n")
+    if flag == "y":
+        utils.printtext(wordlist,index)
+    else:
+        print("query complete\n")
+    # docID = topk.topK(wordlist,index)
+    # #print(index)k
+    # utils.printtext(wordlist,docID)
+
 
 #for each boolean word, do something to the index(notice ( and ) )
 #and

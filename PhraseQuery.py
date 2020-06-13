@@ -143,13 +143,25 @@ def phrasequery(query):
             else:
                 docID = merge(docID, tmpID)
     if docID is not None:
-        docID = topk.topK(wordlist,docID)
-        printquery = [query]
-        newwords = wordlist[0].title()
-        for i in range(1, len(wordlist)):
-            newwords += " "+wordlist[i].title()
-        printquery.append(newwords)
-        utils.printtext(printquery,docID)
+        print("The result is as follows: \n Totally find ",len(docID), " docs.\n")
+        print(docID)
+        flag = input("Do you want to see all docs? (y/n): \n")
+        if flag == "y":
+            printquery = [query]
+            newwords = wordlist[0].title()
+            for i in range(1, len(wordlist)):
+                newwords += " "+ wordlist[i].title()
+            printquery.append(newwords)
+            utils.printtext(printquery,docID)
+        else:
+            print("query complete\n")
+        # docID = topk.topK(wordlist,docID)
+        # printquery = [query]
+        # newwords = wordlist[0].title()
+        # for i in range(1, len(wordlist)):
+        #     newwords += " "+wordlist[i].title()
+        # printquery.append(newwords)
+        # utils.printtext(printquery,docID)
 
 
 

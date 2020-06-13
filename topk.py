@@ -1,109 +1,91 @@
-import score
 import utils
+import cmath
+import queue
 
-class ZHeap:
-    def __init__(self, item=[], id=[]):
-        self.items = item
-        self.ids = id
-        self.heapsize = len(self.items)
+class PriorityQueue:
+    def __init__(self, scoreDocList, N, K):
+        self.data = scoreDocList
+        self.n = N
+        self.k = K
 
-    def LEFT(self, i):
-        return 2 * i + 1
-
-    def RIGHT(self, i):
-        return 2 * i + 2
-
-    def PARENT(self, i):
-        return int((i - 1) / 2)
-
-    def MIN_HEAPIFY(self, i):
-        l = self.LEFT(i)
-        r = self.RIGHT(i)
-        if l < self.heapsize and self.items[l] < self.items[i]:
-            smallest = l
-        else:
-            smallest = i
-
-        if r < self.heapsize and self.items[r] < self.items[smallest]:
-            smallest = r
-
-        if smallest != i:
-            self.items[i], self.items[smallest] = self.items[smallest], self.items[i]
-            self.ids[i], self.ids[smallest] = self.ids[smallest], self.ids[i]
-            self.MIN_HEAPIFY(smallest)
-
-    def INSERT(self, val,id):
-        self.items.append(val)
-        self.ids.append(id)
-        idx = len(self.items) - 1
-        parIdx = int(self.PARENT(idx))
-        while parIdx >= 0:
-            if self.items[parIdx] > self.items[idx]:
-                self.items[parIdx], self.items[idx] = self.items[idx], self.items[parIdx]
-                self.ids[parIdx], self.ids[idx] = self.ids[idx], self.ids[parIdx]
-                idx = parIdx
-                parIdx = self.PARENT(parIdx)
+    def percDown(self, start, end):
+        now = self.data[start]
+        while 2*start+1 < end:
+            child = 2*start+1
+            if child != end-1 and self.data[child+1][0] > self.data[child][0]:
+                child += 1
+            if now[0] < self.data[child][0]:
+                self.data[start] = self.data[child]
             else:
                 break
-        self.heapsize += 1
+            start = child
+        self.data[start] = now
 
-    def DELETE(self):
-        last = len(self.items) - 1
-        if last < 0:
-            return None
-        # else:
-        self.items[0], self.items[last] = self.items[last], self.items[0]
-        self.ids[0], self.ids[last] = self.ids[last], self.ids[0]
-        val = self.items.pop()
-        id = self.ids.pop()
-        self.heapsize -= 1
-        self.MIN_HEAPIFY(0)
-        return id
+    def sort(self):
+        mid = int(self.n/2)
+        while mid >= 0:
+            self.percDown(mid, self.n)
+            mid -= 1
+        mid = self.n - 1
+        end = 0
+        if self.n - 1 > self.k:
+            end = self.n - 1 - self.k
+        while mid > end:
+            temp = self.data[0]
+            self.data[0] = self.data[mid]
+            self.data[mid] = temp
+            self.percDown(0, mid)
+            mid -= 1
 
+def searchWords(wordList, index):
+    if len(wordList) == 0:
+        return []
+    docID = []
+    for word in wordList:
+        if word not in index:
+            continue
+        for key in index[word]:
+            docID.append(int(key))
+    docID = list(set(docID))
+    return docID
 
-    def BUILD_MIN_HEAP(self):
-        i = self.PARENT(len(self.items) - 1)
-        while i >= 0:
-            self.MIN_HEAPIFY(i)
-            i -= 1
+def getWfidfScore(index, doc, wordList):
+    score = 0
+    doc = str(doc)
+    for word in wordList:
+        if word not in index or doc not in index[word]:
+            continue
+        tf = len(index[word][doc])
+        wf = 1 + cmath.log10(tf).real
+        df = len(index[word])
+        idf = cmath.log10(utils.D/df).real
+        score += wf * idf
+    return score
 
-    def SHOW(self):
-        print(self.items)
+def topK(wordlist, index):
+    if type(wordlist) != list:
+        wordlist = wordlist.strip(' ').split(' ')
 
-
-class ZPriorityQ(ZHeap):
-    def __init__(self, item=[]):
-        ZHeap.__init__(self, item)
-
-    def enQ(self, val, id):
-        ZHeap.INSERT(self, val, id)
-
-    def deQ(self):
-        val = ZHeap.DELETE(self)
-        return val
-
-def topK(wordlist, docID):
+    docID = searchWords(wordlist, index)
     print("The result is as follows: \n Totally find ",len(docID), " docs.\n")
     flag = input("Do you want to see all docs? (y/n): ")
     if flag == "y":
         K = -1
     else:
-        K = int(input("How many docs do you want to see? (topK)"))
-    # K = int(input("how many doc do you want to see at most?\nprint -1 for all docs.\n"))
-    #print("here is topK")
-    VSM_sum = utils.get_from_file('VSM_sum')
-    pq = ZPriorityQ()
+        K = int(input("How many docs do you want to see? (topK)\n"))
     if len(docID) < K or K == -1:
         K = len(docID)
+    scoreDocList = []
     for doc in docID:
-        doc_score = VSM_sum[str(doc)]
-        pq.enQ(doc_score, doc)
-    result = []
-    for i in range(K):
-        doc = pq.deQ()
-        #print(doc)
-        result.append(doc)
+        scoreDocList.append([getWfidfScore(index, doc, wordlist), doc])
+
+    pq = PriorityQueue(scoreDocList,len(docID),K)
+    pq.sort()
+    result = [pq.data[len(docID)-x-1] for x in range(0,K)]
+
+    # print("\n\n************* Show Result ************\n\nFind ",len(docID), " docs.\n")
     print("Show ", len(result), " docs.\n")
-    print(result)
+    for doc in result:
+        print("docID: ", doc[1], ", score: ",doc[0])
     stop = input("\nPress any key to show articles...\n")
-    return result
+    return result    

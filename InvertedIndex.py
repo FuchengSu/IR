@@ -40,6 +40,7 @@ def get_wordlist(index):
 # IDF = log_2(D/len(index[word])), D=10788
 # TF-IDF_word_i = TF*IDF
 def create_VSM(index, doc_size, wordlist):
+    index = utils.get_from_file('index')
     VSM = {}
     for d in range(1, utils.D*2+1): # 21576
         if d % 1000 == 0:
@@ -51,15 +52,15 @@ def create_VSM(index, doc_size, wordlist):
         for word in wordlist:
             if str(d) not in index[word]:
                 num += 1
-                continue
             else:
-                if num > 0:
-                    tf_idf_list.append(str(num))
-                tf = float(len(index[word][str(d)])/doc_size[d])
+                tf = float(1 + math.log2(len(index[word][str(d)])))
+                # tf = float(len(index[word][str(d)])/doc_size[d])
+                # print(word)
+                # ttt = input()
                 idf = math.log2(utils.D/len(index[word]))
                 tf_idf = '%.3f' % float(tf*idf) 
-                tf_idf_list.append(tf_idf)
-                num = 0
+                tf_idf_list.append([num,tf_idf])
+                num = 1
         VSM[d] = tf_idf_list
 
     return VSM
@@ -70,11 +71,29 @@ def VSM_sum(VSM):
     for d in range(1, utils.D*2+1): # 21576
         if d % 1000 == 0:
             print('Processing'+str(d))
-        if str(d) in VSM.keys():
+        if d in VSM.keys():
             sum = 0.0
-            for tfidf in VSM[str(d)]:
-                if float(tfidf) < 1:
-                    sum += float(tfidf)
-            sum_VSM[d] = '%.3f' % sum
+            temp = VSM[d]
+            for tfidf in temp:
+                sum += float(tfidf[1])**2
+            for tfidf in temp:
+                tfidf[1] = str(float(tfidf[1])/sum)
+            sum_VSM[d] = temp
+        #    print(VSM[str(d)])
+        #    print(sum_VSM[d])
     
     return sum_VSM
+
+# def VSM_sum(VSM):
+#     sum_VSM = {}
+#     for d in range(1, utils.D*2+1): # 21576
+#         if d % 1000 == 0:
+#             print('Processing'+str(d))
+#         if str(d) in VSM.keys():
+#             sum = 0.0
+#             for tfidf in VSM[str(d)]:
+#                 if float(tfidf) < 1:
+#                     sum += float(tfidf)
+#             sum_VSM[d] = '%.3f' % sum
+    
+#     return sum_VSM
