@@ -49,18 +49,22 @@ def searchWords(wordList, index):
     docID = list(set(docID))
     return docID
 
-def getWfidfScore(index, doc, wordList):
-    score = 0
+def getScore(index, doc, wordList, VSM, wordict):
+    AB = 0
+    A = 1
+    B = 1
     doc = str(doc)
-    for word in wordList:
-        if word not in index or doc not in index[word]:
-            continue
-        tf = len(index[word][doc])
-        wf = 1 + cmath.log10(tf).real
-        df = len(index[word])
-        idf = cmath.log10(utils.D/df).real
-        score += wf * idf
-    return score
+    now = 0
+    print(VSM[doc])
+    for i in range(len(VSM[doc])//2):
+        now += int(VSM[doc][2*i])
+        if wordict[now] in wordList:
+            q = VSM[doc][2*i+1]
+            AB += wfidf/(len(wordList)**0.5)
+            A *= wfidf**2
+            B *= 1/len(wordList)
+
+    return AB/((A*B)**0.5)
 
 def topK(wordlist, index):
     if type(wordlist) != list:
@@ -76,8 +80,11 @@ def topK(wordlist, index):
     if len(docID) < K or K == -1:
         K = len(docID)
     scoreDocList = []
+    VSM = utils.get_from_file('VSM')
+    wordict = utils.get_from_file('wordlist')
+    VSM_sum = utils.get_from_file('VSM_sum')
     for doc in docID:
-        scoreDocList.append([getWfidfScore(index, doc, wordlist), doc])
+        scoreDocList.append([getScore(index, doc, wordlist, VSM, wordict)+0.01*VSM_sum[doc], doc])
 
     pq = PriorityQueue(scoreDocList,len(docID),K)
     pq.sort()
@@ -89,3 +96,24 @@ def topK(wordlist, index):
         print("docID: ", doc[1], ", score: ",doc[0])
     stop = input("\nPress any key to show articles...\n")
     return result    
+
+
+def topK2(wordlist, docID):
+    print("The result is as follows: \n Totally find ",len(docID), " docs.\n")
+    flag = input("Do you want to see all docs? (y/n): ")
+    if flag == "y":
+        K = -1
+    else:
+        K = int(input("How many docs do you want to see? (topK)\n"))
+    if len(docID) < K or K == -1:
+        K = len(docID)
+    index = utils.get_from_file('index')
+    scoreDocList = []
+    for doc in docID:
+        scoreDocList.append([getWfidfScore(index, doc, wordlist), doc])
+    pq = PriorityQueue(scoreDocList,len(docID),K)
+    pq.sort()
+    result = [pq.data[len(docID)-x-1] for x in range(0,K)]
+    for doc in result:
+        print("docID: ", doc[1], ", score: ",doc[0])
+    return result

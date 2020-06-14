@@ -167,7 +167,7 @@ class Tree(object):
 
 #to build a btree of using all words and build a btree_rev of reverse words
 def BuildTree(wordlist):
-    print("prepare the b-tree index")
+    print("Prepare the b-tree index...")
     btree = Tree()
     btree_rev = Tree()
     for word in wordlist:
@@ -285,14 +285,17 @@ def controller(query, btree, btree_rev, words):
     for i in range(1,len(docIDlist)):
         result = BooleanQuery.handle_or(result,docIDlist[i])
 
+    topk.topK2(wordlist, result)
+    # print("The result is as follows: \n Totally find ",len(result), " docs.\n")
+    # print(result)
+    # flag = input("Do you want to see all docs? (y/n): \n")
+    # if flag == "y":
+    #     utils.printtext(wordlist,result)
+    # else:
+    #     print("query complete\n")
 
-    print("The result is as follows: \n Totally find ",len(result), " docs.\n")
-    print(result)
-    flag = input("Do you want to see all docs? (y/n): \n")
-    if flag == "y":
-        utils.printtext(wordlist,result)
-    else:
-        print("query complete\n")
+
+    
     # docID = topk.topK(wordlist, result)
     # utils.printtext(wordlist, docID)
     #utils.printtext(wordlist, result)

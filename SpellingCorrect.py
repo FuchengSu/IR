@@ -39,7 +39,15 @@ def version1(word):
     swap_adjacent_two_chars = [word[0:i] + word[i+1]+ word[i]+ word[i+2:] for i in range(n-1)] 
     return set( add_a_char + delete_a_char +
                revise_a_char +  swap_adjacent_two_chars)
-      
+
+
+def edits1(word):
+    splits = [(word[:i], word[i:]) for i in range(len(word) + 1)]
+    deletes = [a + b[1:] for a, b in splits if b]
+    transposes = [a + b[1] + b[0] + b[2:] for a, b in splits if len(b) > 1]
+    replaces = [a + c + b[1:] for a, b in splits for c in alpha if b]
+    inserts = [a + c + b for a, b in splits for c in alpha]
+    return set(deletes + transposes + replaces + inserts)
 
 def version2(word):
     return set(e2 for e1 in edits1(word) for e2 in edits1(e1))
@@ -93,6 +101,7 @@ def spelling_correct(x):
 	flag = input("Do you want to query as the first correction? (y/n): ")
 	if flag == "y":
 		print("The corrected query is \"", query, "\"")
+		query = query.strip()
 		PhraseQuery.phrasequery(query)
 # query = "prider and prejudice "
 # spelling_correct(query)

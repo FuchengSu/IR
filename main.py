@@ -37,14 +37,18 @@ def prepare():
 def main():
     # prepare()
     print("Preparing...")
+    print("Getting the inverted index...")
     index = utils.get_from_file('index')
+    print("Getting all words...")
     wordlist = utils.get_from_file('wordlist')
+    print("Getting VB-code compressed index...")
     doc_size = utils.get_from_file('doc_size')
+    print("Getting VSM model...")
     VSM = utils.get_from_file('VSM')
     btree, btree_rev = GlobbingQuery.BuildTree(wordlist)
     print("*"*53*2)
     print(" "*34,"This is a simple search engine.")
-    print("Support: Bollean query, Wildcard query, Spelling correction, Phrase query and Synonym expansion.")
+    print("Support: Bollean query, quick topK query, Wildcard query, Spelling correction, Phrase query and Synonym expansion.")
     print("Also use Top K strategy of static score, VB code index compression strategy and dictionary built by b-tree")
     fsize1 = os.path.getsize('index.json')
     fsize2 = os.path.getsize('indexcompress.json')
@@ -59,13 +63,13 @@ def main():
         
     while True:
         print("*"*53*2)
-        print("Now you can choose the query mode:")
+        print("Choose the query mode from following:")
         print(" "*4,"1. Bollean query")
-        print(" "*4,"2. Wildcard query")
+        print(" "*4,"2. topK search")
         print(" "*4,"3. Spelling correction")
         print(" "*4,"4. Phrase query")
         print(" "*4,"5. Synonym expansion")
-        print(" "*4,"6. topK search")
+        print(" "*4,"6. Wildcard query")
         number = input("Input -1 to quit\n")
         if int(number)==-1:
             break
@@ -79,7 +83,7 @@ def main():
             BooleanQuery.controller(query)
 
         if(int(number)==2):
-            GlobbingQuery.controller(query, btree, btree_rev,wordlist)
+            topk.topK(query, index)
 
         if(int(number)==3):
             SpellingCorrect.spelling_correct(query)
@@ -91,7 +95,7 @@ def main():
             Synonyms.synonyms_query(query)
 
         if(int(number)==6):
-            topk.topK(query, index)
+            GlobbingQuery.controller(query, btree, btree_rev, wordlist)
 
         time_end = time.time()
         print("query time: ", time_end-time_start)
@@ -99,6 +103,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # initial()
+    initial()
     # prepare()
     main()
