@@ -52,7 +52,8 @@ def edits1(word):
 def version2(word):
     return set(e2 for e1 in edits1(word) for e2 in edits1(e1))
 
-
+def version3(word):
+    return set(e3 for e1 in edits1(word) for e2 in edits1(e1) for e3 in edits1(e2))
 
 def identify(words):
     return set(w for w in words if w in nwords)
@@ -83,6 +84,9 @@ def bayesClassifier(word):
     wanteds = identify(version2(word))
     if len(wanteds)>0:
         return getMax(wanteds)
+#     wanteds = identify(version3(word))
+#     if len(wanteds) > 0:
+#         return getMax(wanteds)
     else:    
         return [word + ' not found in dictionary!' ]
 
