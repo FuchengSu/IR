@@ -20,6 +20,7 @@ def boolquery(query):
     word = ''
     word_last = ''
 
+
     i=0
     while i<len(query):
         if(query[i]=='('): #when we meet ()
@@ -174,8 +175,19 @@ def boolquery(query):
 
 
 #get user input and judge the boolean word
-def controller(query):
-    index = boolquery(query)
+def controller(query, index, VSM, wordict):
+    if "MINUS" in query:
+        query_list = query.split("MINUS")
+        query1 = query_list[0]
+        query2 = query_list[1]
+        query_result1 = boolquery(query1)
+        query_result2 = boolquery(query2)
+        for i in query_result2:
+            if i in query_result1:
+                query_result1.remove(i)
+        result = query_result1
+    else:
+        result = boolquery(query)
     query.replace('NOT','')
     query.replace('AND','')
     query.replace('OR','')
@@ -184,7 +196,7 @@ def controller(query):
     query.replace('  ',' ')
     wordlist = []
     wordlist = query.split(' ')
-    topk.topK2(wordlist, index)
+    topk.topK2(wordlist, result, index, VSM, wordict)
     # print("The result is as follows: \n Totally find ",len(index), " docs:\n")
     # print(index)
     # flag = input("Do you want to see all docs? (y/n): \n")
